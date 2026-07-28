@@ -1,0 +1,44 @@
+{
+    "plc": {
+        "ip": "192.168.0.1",
+        "rack": 0,
+        "slot": 1
+    },
+    "units": [
+        {
+            "name": "Unit01",
+            "state_db": 4,
+            "state_byte": 16
+        }
+    ],
+    "stations": [
+        {
+            "name": "EM01",
+            "state_db": 0,
+            "state_byte": 0,
+            "status_db": 0,
+            "status_byte": 0
+        },
+        {
+            "name": "EM02",
+            "state_db": 0,
+            "state_byte": 0,
+            "status_db": 0,
+            "status_byte": 0
+        }
+    ],
+    "state_colors": {
+        "Execute": "#25e46e",
+        "Held": "#f64d3b",
+        "Holding": "#e67e22",
+        "Idle": "#d2d432",
+        "Resetting": "#1700e9",
+        "Starting": "#3498db",
+        "Stopped": "#ff0000",
+        "Stopping": "#d42459",
+        "Suspended": "#ff00dd",
+        "Suspending": "#0033ff",
+        "Un-holding": "#e67e22",
+        "Un-suspending": "#de5efb"
+    }
+}

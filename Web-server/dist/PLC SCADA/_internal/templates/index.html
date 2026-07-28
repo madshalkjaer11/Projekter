@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SCADA</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="navbar">
+
+        <div class="nav-links">
+
+            <a href="/settings">Settings</a>
+
+            <a href="/">EM Overview</a>
+
+            <a href="/unit">Unit Overview</a>
+
+            <a href="/download/packml-log">Download CSV</a>
+
+        </div>
+
+
+        <div class="nav-status">
+
+            <div id="plcLamp"
+                class="lamp red"></div>
+
+            <div id="plcText">
+                PLC Disconnected
+            </div>
+
+        </div>
+
+    </div>
+
+<div class="topbar">
+
+    <div class="dashboard-title">
+        EM PackML Dashboard
+    </div>
+
+    <div id="runtime"
+         class="topbar-runtime">
+
+        00:00:00
+
+    </div>
+
+</div>
+
+    <div class="dashboard">
+
+        {% for station in config.stations %}
+
+        <div class="card">
+
+            <h2>{{ station.name }}</h2>
+
+            <canvas id="chart{{ loop.index }}"></canvas>
+
+            <div class="info-row">
+
+                <div id="state{{ loop.index }}"
+                    class="info-box"></div>
+
+                <div id="status{{ loop.index }}"
+                    class="info-box"></div>
+
+                <div id="oee{{ loop.index }}"
+                    class="info-box"></div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <script id="stateColorsData" type="application/json">
+        {{ config.state_colors | tojson }}
+    </script>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
