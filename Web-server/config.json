@@ -9,6 +9,16 @@
             "name": "Unit01",
             "state_db": 4,
             "state_byte": 16
+        },
+        {
+            "name": "Unit02",
+            "state_db": 0,
+            "state_byte": 0
+        },
+        {
+            "name": "Unit03",
+            "state_db": 0,
+            "state_byte": 0
         }
     ],
     "stations": [
@@ -35,6 +45,34 @@
         },
         {
             "name": "EM04",
+            "state_db": 0,
+            "state_byte": 0,
+            "status_db": 0,
+            "status_byte": 0
+        },
+        {
+            "name": "EM05",
+            "state_db": 0,
+            "state_byte": 0,
+            "status_db": 0,
+            "status_byte": 0
+        },
+        {
+            "name": "EM06",
+            "state_db": 0,
+            "state_byte": 0,
+            "status_db": 0,
+            "status_byte": 0
+        },
+        {
+            "name": "EM07",
+            "state_db": 0,
+            "state_byte": 0,
+            "status_db": 0,
+            "status_byte": 0
+        },
+        {
+            "name": "EM08",
             "state_db": 0,
             "state_byte": 0,
             "status_db": 0,

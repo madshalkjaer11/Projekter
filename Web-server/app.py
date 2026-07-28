@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request, send_file
+from werkzeug.serving import make_server
 from plc_reader import PLCReader
 from datetime import datetime
 
@@ -8,12 +9,28 @@ import csv
 import random
 import json
 import os
+import sys
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = BASE_DIR
+
+    return os.path.join(base_path, relative_path)
 
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 
-with open(CONFIG_PATH, "r") as file:
+with open(
+    CONFIG_PATH,
+    "r",
+    encoding="utf-8"
+) as file:
     CONFIG = json.load(file)
 
 if "units" not in CONFIG:
@@ -28,11 +45,15 @@ if "units" not in CONFIG:
         })
 
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=resource_path("templates"),
+    static_folder=resource_path("static")
+)
 
 system_start_time = time.time()
 
-SIMULATION_MODE = True
+SIMULATION_MODE = False
 
 plc_connected = False
 
@@ -40,15 +61,7 @@ plc_connected = False
 # PLC
 # --------------------------------------------------
 
-plc = PLCReader(
-    ip=CONFIG["plc"]["ip"],
-    rack=CONFIG["plc"]["rack"],
-    slot=CONFIG["plc"]["slot"]
-)
-
-if not SIMULATION_MODE:
-    plc.connect()
-
+plc = None
 
 # --------------------------------------------------
 # PACKML STATES
@@ -162,11 +175,19 @@ def calculate_oee(history):
 # CSV SETUP
 # --------------------------------------------------
 
-csv_file = "packml_log.csv"
+LOG_DIR = os.path.join(BASE_DIR, "Logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+csv_file = os.path.join(LOG_DIR, "packml_log.csv")
 
 try:
 
-    with open(csv_file, "x", newline="") as file:
+    with open(
+        csv_file,
+        "x",
+        newline="",
+        encoding="utf-8"
+    ) as file:
 
         writer = csv.writer(file)
 
@@ -195,12 +216,17 @@ def plc_loop():
     global state_history
     global unit_history
     global plc_connected
+    global plc
 
     last_csv_write = 0
     last_update = time.time()
 
 
     while True:
+
+        if not SIMULATION_MODE and plc is None:
+            time.sleep(1)
+            continue
 
         now = time.time()
         delta_time = round(now - last_update, 2)
@@ -374,7 +400,12 @@ def plc_loop():
                 )
 
 
-                with open(csv_file, "a", newline="") as file:
+                with open(
+                  csv_file,
+                 "a",
+                 newline="",
+                encoding="utf-8"
+                ) as file:
 
                     writer = csv.writer(file)
 
@@ -404,16 +435,22 @@ def plc_loop():
 # START THREAD
 # --------------------------------------------------
 
-thread = threading.Thread(target=plc_loop)
-
-thread.daemon = True
-
-thread.start()
+thread = None
 
 
 # --------------------------------------------------
 # ROUTES
 # --------------------------------------------------
+
+@app.route("/shutdown")
+def shutdown():
+
+    func = request.environ.get("werkzeug.server.shutdown")
+
+    if func:
+        func()
+
+    return ""
 
 @app.route("/unit")
 def unit_page():
@@ -507,11 +544,18 @@ def save_settings():
         for _ in CONFIG["units"]
     ]
 
-    with open(CONFIG_PATH, "w") as file:
+    with open(
+    CONFIG_PATH,
+    "w",
+    encoding="utf-8"
+    ) as file:
         json.dump(CONFIG, file, indent=4)
 
-    if not SIMULATION_MODE:    
-        plc.disconnect()
+    if not SIMULATION_MODE and plc is not None:
+        try:
+            plc.disconnect()
+        except Exception:
+            pass
 
     plc = PLCReader(
         ip=CONFIG["plc"]["ip"],
@@ -538,6 +582,58 @@ def save_settings():
 # START SERVER
 # --------------------------------------------------
 
-if __name__ == "__main__":
+server = None
 
-    app.run(debug=False)
+def start_server():
+
+    global server
+    global thread
+    global plc
+
+    if not SIMULATION_MODE:
+
+        plc = PLCReader(
+        CONFIG["plc"]["ip"],
+        CONFIG["plc"]["rack"],
+        CONFIG["plc"]["slot"]
+        )
+
+        try:
+            plc.connect()
+        except Exception as e:
+            print("PLC kunne ikke forbindes:", e)
+
+    thread = threading.Thread(
+        target=plc_loop,
+        daemon=True
+    )
+    thread.start()
+
+    server = make_server(
+        "127.0.0.1",
+        5000,
+        app
+    )
+
+    server.serve_forever()
+
+
+def stop_server():
+
+    global server
+    global plc
+
+    print("Stopping server...")
+
+    if plc is not None:
+
+        try:
+            plc.disconnect()
+
+        except Exception:
+            pass
+
+        plc = None
+
+    if server:
+        server.shutdown()
