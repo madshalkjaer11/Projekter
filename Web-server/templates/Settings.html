@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SCADA</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="navbar">
+
+        <div class="nav-links">
+            <a href="/settings">Settings</a>
+            <a href="/">EM Overview</a>
+            <a href="/unit">Unit Overview</a>
+            <a href="/download/packml-log">Download CSV</a>
+        </div>
+
+        <div class="nav-status">
+            <div id="plcLamp" class="lamp red"></div>
+
+            <div id="plcText">
+                PLC Disconnected
+            </div>
+        </div>
+
+    </div>
+
+    <div class="topbar"></div>
+
+    <div class="settings-layout">
+
+        <!-- VENSTRE KOLONNE -->
+        <div class="left-column">
+
+            <!-- PLC SETTINGS -->
+            <div class="settings-card top-settings-card">
+
+                <form id="plcConfigForm">
+
+                    <h1>PLC Settings</h1>
+
+                    <section id="PLC-settings">
+                        <div class="plc-card">
+
+                            <div class="plc-field">
+                                <label class="settings-label" for="plcIp">
+                                    PLC IP
+                                </label>
+                                <input type="text"
+                                    id="plcIp"
+                                    name="ip"
+                                    value="{{ config.plc.ip }}"
+                                    class="input-felt">
+                            </div>
+
+                            <div class="plc-field">
+                                <label class="settings-label" for="plcRack">
+                                    Rack
+                                </label>
+                                <input type="number"
+                                    id="plcRack"
+                                    name="rack"
+                                    value="{{ config.plc.rack }}"
+                                    class="input-felt">
+                            </div>
+
+                            <div class="plc-field">
+                                <label class="settings-label" for="plcSlot">
+                                    Slot
+                                </label>
+                                <input type="number"
+                                    id="plcSlot"
+                                    name="slot"
+                                    value="{{ config.plc.slot }}"
+                                    class="input-felt">
+                            </div>
+                            
+                        </div>
+                    </section>
+
+                </form>
+
+            </div>
+
+            <!-- UNIT SETTINGS -->
+            <div class="settings-card">
+
+                <form id="unitConfigForm">
+
+                    <h1>Unit Settings</h1>
+
+                    <section>
+                        <label class="settings-label-EM">
+                            Antal Units:
+                        </label>
+
+                        <input
+                            type="number"
+                            name="unit_count"
+                            min="0"
+                            max="50"
+                            value="{{ config.units|length }}"
+                            class="input-felt">
+                    </section>
+
+                    <br>
+
+                    <div id="unitsContainer">
+                        {% for unit in config.units %}
+                        <div class="station-card">
+
+                            <label class="station-name">
+                                {{ unit.name }}
+                            </label>
+
+                            <label class="EM-label">State DB</label>
+                            <input type="number"
+                                name="unit_state_db_{{ loop.index0 }}"
+                                value="{{ unit.state_db }}"
+                                class="input-felt">
+
+                            <label class="EM-label">State Byte</label>
+                            <input type="number"
+                                name="unit_state_byte_{{ loop.index0 }}"
+                                value="{{ unit.state_byte }}"
+                                class="input-felt">
+
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- HØJRE KOLONNE -->
+        <div class="right-column">
+
+            <!-- Farveindstillinger -->
+            <div class="settings-card top-settings-card">
+
+                <form id="colorConfigForm">
+
+                    <h1>Diagram Farver</h1>
+
+                    <div class="color-card">
+
+                        <select id="stateSelect" class="input-felt-long">
+                            
+                            {% for state, color in config.state_colors.items() %}
+                                <option value="{{ state }}">
+                                    {{ state }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+
+                        <label class="EM-label">Farve</label>
+                        <input
+                            type="color"
+                            id="stateColorPicker">
+
+
+                    </div>
+
+                </form>
+            </div>
+
+            <br>
+
+            <div class="settings-card">
+
+                <form id="emConfigForm">
+
+                    <h1>EM Settings</h1>
+
+                    <section id="EM-settings">
+
+                        <label class="settings-label-EM">
+                            Antal EM'er:
+                        </label>
+
+                        <input
+                            type="number"
+                            id="emCount"
+                            name="em_count"
+                            min="0"
+                            max="100"
+                            value="{{ config.stations|length }}"
+                            class="input-felt">
+
+                    </section>
+
+                    <br>
+
+                    <div id="stationsContainer">
+
+                        {% for station in config.stations %}
+                        <div class="station-card">
+
+                            <label class="station-name">
+                                {{ station.name }}
+                            </label>
+
+                            <label class="EM-label">State DB</label>
+                            <input type="number"
+                                name="state_db_{{ loop.index0 }}"
+                                value="{{ station.state_db }}"
+                                class="input-felt">
+
+                            <label class="EM-label">State Byte</label>
+                            <input type="number"
+                                name="state_byte_{{ loop.index0 }}"
+                                value="{{ station.state_byte }}"
+                                class="input-felt">
+
+                            <label class="EM-label">Status DB</label>
+                            <input type="number"
+                                name="status_db_{{ loop.index0 }}"
+                                value="{{ station.status_db }}"
+                                class="input-felt">
+
+                            <label class="EM-label">Status Byte</label>
+                            <input type="number"
+                                name="status_byte_{{ loop.index0 }}"
+                                value="{{ station.status_byte }}"
+                                class="input-felt">
+
+                        </div>
+                        {% endfor %}
+
+                    </div>
+
+                    <section class="save-section">
+                            <button type="submit" class="save-button">
+                                Gem Indstillinger
+                            </button>
+                    </section>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script id="stateColorsData" type="application/json">
+        {{ config.state_colors | tojson }}
+    </script>
+    <script src="{{ url_for('static', filename='settings.js') }}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>SCADA</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+        <!-- NAVBAR -->
+
+    <div class="navbar">
+
+        <div class="nav-links">
+
+            <a href="/settings">Settings</a>
+
+            <a href="/">EM Overview</a>
+
+            <a href="/unit">Unit Overview</a>
+
+            <a href="/download/packml-log">Download CSV</a>
+
+        </div>
+
+
+        <div class="nav-status">
+
+            <div id="plcLamp"
+                class="lamp red"></div>
+
+            <div id="plcText">
+                PLC Disconnected
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TOPBAR -->
+
+<div class="topbar">
+
+    <div class="dashboard-title">
+        UNIT PackML Dashboard
+    </div>
+
+    <div id="runtime"
+         class="topbar-runtime">
+
+        00:00:00
+
+    </div>
+
+</div>
+
+    <!-- UNIT CARDS -->
+
+    <div class="unit-container">
+
+        {% for unit in config.units %}
+        <div class="unit-card">
+
+            <h2>{{ unit.name }}</h2>
+
+            <canvas id="unitChart{{ loop.index }}"></canvas>
+
+            <div class="unit-state-box">
+
+                <div class="label">
+                    Current Unit State
+                </div>
+
+                <div id="unitState{{ loop.index }}"
+                     class="info-value">
+
+                    Idle
+
+                </div>
+
+            </div>
+
+            <div class="unit-state-box">
+
+                <div class="label">
+                    OEE
+                </div>
+
+                <div id="unitOee{{ loop.index }}"
+                     class="info-value">
+
+                    0.0%
+
+                </div>
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <script id="stateColorsData" type="application/json">
+        {{ config.state_colors | tojson }}
+    </script>
+
+    <script src="{{ url_for('static',
+        filename='unit.js') }}"></script>
+
+</body>
+
+</html>
