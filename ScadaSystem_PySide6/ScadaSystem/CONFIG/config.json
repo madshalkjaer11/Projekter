@@ -1,0 +1,29 @@
+{
+    "plc": {
+        "ip": "192.168.0.1",
+        "rack": 0,
+        "slot": 1
+    },
+    "units": [
+        {
+            "name": "UNIT 1",
+            "db": 11,
+            "packml_state": 11,
+            "oee": 11,
+            "availability": 11,
+            "performance": 11,
+            "quality": 11
+        }
+    ],
+    "ems": [
+        {
+            "name": "EM 01",
+            "db": 22,
+            "packml_state": 22,
+            "oee": 22,
+            "availability": 22,
+            "performance": 22,
+            "quality": 22
+        }
+    ]
+}
